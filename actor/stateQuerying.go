@@ -1,4 +1,4 @@
-package Sway
+package main
 
 import (
 	"github.com/mdirkse/i3ipc-go"
@@ -10,7 +10,7 @@ const ContainerSway = "con"
 const WorkspaceSway = "workspace"
 
 func (swayConn *I3ipcConnection) getSwayTree(state WorkspaceState) {
-	root, err := swayConn.conn.GetTree()
+	root, err := swayConn.Conn.GetTree()
 	if err != nil {
 		return
 	}
@@ -27,11 +27,11 @@ func ParseSwayTree(root *i3ipc.I3Node, currentWorkspace int, workspaceState Work
 		}
 		currentWorkspace = workspaceNumber
 	} else if root.Type == ContainerSway {
-		v, exists := workspaceState.windows[root.ID]
+		v, exists := workspaceState.Windows[root.ID]
 		if exists {
 			UpdateWindowState(root, currentWorkspace, &v)
 		} else {
-			workspaceState.windows[root.ID] = CreateWindowState(root, currentWorkspace)
+			workspaceState.Windows[root.ID] = CreateWindowState(root, currentWorkspace)
 		}
 	}
 	for _, node := range root.Nodes {
