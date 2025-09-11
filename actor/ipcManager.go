@@ -17,7 +17,7 @@ type WorkspaceState struct {
 } //todo check deleted windows
 
 type WindowState struct {
-	AppName         string //todo
+	AppInfo         string
 	Rect            i3ipc.Rect
 	WorkspaceNumber int
 	Activity        WindowActivity

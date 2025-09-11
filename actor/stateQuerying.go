@@ -53,7 +53,7 @@ func CreateWindowState(node *i3ipc.I3Node, workspaceNumber int) WindowState {
 		FocusDuration: focusDuration,
 	}
 	return WindowState{
-		AppName:         node.Name,
+		AppInfo:         node.Name,
 		Rect:            node.Rect,
 		WorkspaceNumber: workspaceNumber,
 		Activity:        activity,
@@ -62,7 +62,7 @@ func CreateWindowState(node *i3ipc.I3Node, workspaceNumber int) WindowState {
 }
 
 func UpdateWindowState(node *i3ipc.I3Node, workspaceNumber int, windowState *WindowState) {
-	windowState.AppName = node.Name
+	windowState.AppInfo = node.Name
 	windowState.Rect = node.Rect
 	windowState.WorkspaceNumber = workspaceNumber
 	windowState.StillExists = true
