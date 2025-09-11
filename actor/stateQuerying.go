@@ -57,6 +57,7 @@ func CreateWindowState(node *i3ipc.I3Node, workspaceNumber int) WindowState {
 		Rect:            node.Rect,
 		WorkspaceNumber: workspaceNumber,
 		Activity:        activity,
+		StillExists:     true,
 	}
 }
 
@@ -64,6 +65,7 @@ func UpdateWindowState(node *i3ipc.I3Node, workspaceNumber int, windowState *Win
 	windowState.AppName = node.Name
 	windowState.Rect = node.Rect
 	windowState.WorkspaceNumber = workspaceNumber
+	windowState.StillExists = true
 
 	//todo update activity
 }

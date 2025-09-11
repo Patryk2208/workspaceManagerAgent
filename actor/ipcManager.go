@@ -6,9 +6,8 @@ import (
 )
 
 type I3ipcConnection struct {
-	Conn           *i3ipc.IPCSocket
-	ResponseBuffer chan WorkspaceState
-	ActionBuffer   chan string
+	Conn         *i3ipc.IPCSocket
+	ActionBuffer chan string
 }
 
 //state
@@ -22,6 +21,7 @@ type WindowState struct {
 	Rect            i3ipc.Rect
 	WorkspaceNumber int
 	Activity        WindowActivity
+	StillExists     bool
 }
 
 type WindowActivity struct {
