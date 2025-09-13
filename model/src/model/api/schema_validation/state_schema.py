@@ -25,7 +25,7 @@ class State(BaseModel):
 #entire message format
 class StatePayload(BaseModel):
     """Payload of the state message, containing a list of states for all windows."""
-    state_timestamp: time = Field(description="timestamp of the state")
+    state_timestamp: float = Field(description="timestamp of the state")
     window_states: list[State] = Field(description="list of states for all windows")
 
 def validate_state_payload(state_payload: dict) -> Optional[StatePayload]:

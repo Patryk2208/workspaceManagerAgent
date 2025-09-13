@@ -19,7 +19,7 @@ class Command(BaseModel):
 
 class CommandPayload(BaseModel):
     """Payload of the command message, containing a list of commands to perform, one for each window."""
-    command_timestamp: time = Field(description="timestamp of the command")
+    command_timestamp: float = Field(description="timestamp of the command")
     commands: list[Command] = Field(description="list of commands to perform")
 
 
