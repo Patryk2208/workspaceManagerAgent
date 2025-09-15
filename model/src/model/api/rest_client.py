@@ -2,7 +2,6 @@ import aiohttp
 from typing import Optional
 import logging
 
-from model.config import config
 from model.api.schema_validation.state_schema import StatePayload, validate_state_payload
 from model.api.schema_validation.command_schema import CommandPayload
 

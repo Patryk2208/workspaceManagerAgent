@@ -1,7 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel, Field
 from datetime import timedelta
-from time import time
 
 from .grid_system_schema import GridPosition
 from model.config import config
