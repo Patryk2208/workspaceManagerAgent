@@ -23,7 +23,7 @@ class ScalarFeaturePreprocessor(nn.Module):
             nn.Dropout(dropout_rate)
         )
 
-    def forward(self, scalar_features) -> torch.Tensor:
+    def forward(self, scalar_features : torch.Tensor) -> torch.Tensor:
         """
         forward pass of the scalar preprocessing layer
         :param scalar_features: input tensor of shape (batch_size, windows_number, input_data_dim)
@@ -49,7 +49,7 @@ class TextFeaturePreprocessor(nn.Module):
             nn.Dropout(dropout_rate)
         )
 
-    def forward(self, text_embeddings) -> torch.Tensor:
+    def forward(self, text_embeddings : torch.Tensor) -> torch.Tensor:
         """
         forward pass of the text preprocessing layer
         :param text_embeddings: input tensor of shape (batch_size, windows_number, input_text_dim)
@@ -68,7 +68,7 @@ class FeaturePreprocessor(nn.Module):
         self.scalar_preprocessor = ScalarFeaturePreprocessor(input_data_dim, hidden_preprocessor_dim, output_model_dim, dropout_rate_scalar)
         self.text_preprocessor = TextFeaturePreprocessor(input_text_dim, output_model_dim_text, dropout_rate_text)
 
-    def forward(self, scalar_features, text_embeddings) -> torch.Tensor:
+    def forward(self, scalar_features : torch.Tensor, text_embeddings : torch.Tensor) -> torch.Tensor:
         """
         processes the input features into model dimensions
         :param scalar_features: input scalar features tensor of shape (batch_size, windows_number, input_data_dim)
