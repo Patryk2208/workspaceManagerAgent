@@ -2,7 +2,8 @@ import torch
 import torch.nn as nn
 
 class ScalarFeaturePreprocessor(nn.Module):
-    def __init__(self, input_data_dim, hidden_preprocessor_dim, output_model_dim, dropout_rate):
+    def __init__(self, input_data_dim : int, hidden_preprocessor_dim : int, output_model_dim : int,
+                 dropout_rate : float):
         """
         preprocessing layer for scalar features
         :param input_data_dim: number of scalar features
@@ -33,7 +34,7 @@ class ScalarFeaturePreprocessor(nn.Module):
 
 
 class TextFeaturePreprocessor(nn.Module):
-    def __init__(self, input_text_dim, output_model_dim, dropout_rate):
+    def __init__(self, input_text_dim : int, output_model_dim : int, dropout_rate : float):
         """
         preprocessing layer for text features
         :param input_text_dim: number of text dimensions
@@ -59,13 +60,15 @@ class TextFeaturePreprocessor(nn.Module):
 
 
 class FeaturePreprocessor(nn.Module):
-    def __init__(self, input_data_dim, hidden_preprocessor_dim, output_model_dim, dropout_rate_scalar,
-                 input_text_dim, output_model_dim_text, dropout_rate_text):
+    def __init__(self, input_data_dim : int, hidden_preprocessor_dim : int, output_model_dim_scalar : int,
+                 dropout_rate_scalar : float, input_text_dim : int, output_model_dim_text : int,
+                 dropout_rate_text : float):
         """
         collective preprocessing layer for both scalar and text features
         """
         super().__init__()
-        self.scalar_preprocessor = ScalarFeaturePreprocessor(input_data_dim, hidden_preprocessor_dim, output_model_dim, dropout_rate_scalar)
+        self.scalar_preprocessor = ScalarFeaturePreprocessor(input_data_dim, hidden_preprocessor_dim,
+                                                             output_model_dim_scalar, dropout_rate_scalar)
         self.text_preprocessor = TextFeaturePreprocessor(input_text_dim, output_model_dim_text, dropout_rate_text)
 
     def forward(self, scalar_features : torch.Tensor, text_embeddings : torch.Tensor) -> torch.Tensor:
@@ -76,6 +79,6 @@ class FeaturePreprocessor(nn.Module):
         :return: model-ready features tensor of shape
         (batch_size, windows_number, output_model_dim_scalar + output_model_dim_text)
         """
-        processed_scalar_features = self.scalar_preprocessor(scalar_features)
-        processed_text_embeddings = self.text_preprocessor(text_embeddings)
+        processed_scalar_features = self.scalar_preprocessor.forward(scalar_features)
+        processed_text_embeddings = self.text_preprocessor.forward(text_embeddings)
         return torch.cat((processed_scalar_features, processed_text_embeddings), dim=-1)

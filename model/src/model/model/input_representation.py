@@ -3,7 +3,6 @@ from sentence_transformers import SentenceTransformer
 import math
 
 from model.api.schema_validation.state_schema import StatePayload
-from model.config import config
 
 class TextEmbedder:
     def __init__(self):
@@ -22,18 +21,19 @@ class TextEmbedder:
 
 
 class InputRepresentation:
-    def __init__(self, grid_x, grid_y, max_windows, workspace_number):
+    def __init__(self, grid_x : int, grid_y : int, max_windows : int, max_workspace_number : int,
+                 window_description_embedding_size : int, scalar_features_size : int, batch_size : int):
         #input params
-        self.max_batch_size = 32 #todo
+        self.batch_size = batch_size
         self.max_windows = max_windows
-        self.model_input_size = 392
-        self.window_description_embedding_size = 384
-        self.scalar_features_size = 8
+        self.model_input_size = window_description_embedding_size + scalar_features_size
+        self.window_description_embedding_size = window_description_embedding_size
+        self.scalar_features_size = scalar_features_size
 
         #normalization params
         self.grid_x_max = grid_x - 1
         self.grid_y_max = grid_y - 1
-        self.workspace_number_max = workspace_number - 1
+        self.workspace_number_max = max_workspace_number - 1
         self.log_duration_max: float = 15
 
         #text model
@@ -51,11 +51,7 @@ class InputRepresentation:
 
         :return: tensors of scalar features and text features, as well as a mask indicating which windows are used.
         Tensor shapes: (batch_size, windows_number, 8), (batch_size, windows_number, 384), (batch_size, windows_number)
-
-        :raises ValueError: If the size of `payloads` exceeds the allowed batch size range.
         """
-        if len(payloads) <= 0 or len(payloads) > self.max_batch_size:
-            raise ValueError("invalid batch size")
         window_descriptions = []
         window_embeddings = torch.zeros(len(payloads), self.max_windows, self.window_description_embedding_size)
         scalar_features = torch.zeros(len(payloads), self.max_windows, self.scalar_features_size)

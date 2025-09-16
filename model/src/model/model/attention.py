@@ -3,19 +3,19 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class AttentionLayer(nn.Module):
-    def __init__(self, input_model_dim, dropout_rate):
+    def __init__(self, model_dim : int, dropout_rate : float):
         """
         attention layer for better understanding of the relations between windows
-        :param input_model_dim: model dimension
+        :param model_dim: model dimension
         :param dropout_rate:
         """
         super().__init__()
-        self.input_model_dim = input_model_dim
+        self.input_model_dim = model_dim
         self.dropout_rate = dropout_rate
 
-        self.w_q = nn.Linear(input_model_dim, input_model_dim)
-        self.w_k = nn.Linear(input_model_dim, input_model_dim)
-        self.w_v = nn.Linear(input_model_dim, input_model_dim)
+        self.w_q = nn.Linear(model_dim, model_dim)
+        self.w_k = nn.Linear(model_dim, model_dim)
+        self.w_v = nn.Linear(model_dim, model_dim)
         self.dropout = nn.Dropout(dropout_rate)
 
     def forward(self, x : torch.Tensor, mask : torch.Tensor) -> torch.Tensor:
@@ -46,24 +46,24 @@ class AttentionLayer(nn.Module):
 
 
 class FeedForwardLayer(nn.Module):
-    def __init__(self, input_model_dim, hidden_ff_dim, dropout_rate):
+    def __init__(self, model_dim : int, hidden_ff_dim : int, dropout_rate : float):
         """
         feed-forward layer for better understanding of the relations between windows post-attention
-        :param input_model_dim: model dimension
+        :param model_dim: model dimension
         :param hidden_ff_dim: hidden dimension of the feed-forward layer
         :param dropout_rate:
         """
         super().__init__()
-        self.hidden_ff_dim = hidden_ff_dim or 4 * input_model_dim
+        self.hidden_ff_dim = hidden_ff_dim or 4 * model_dim
         self.ff = nn.Sequential(
-            nn.Linear(input_model_dim, self.hidden_ff_dim),
+            nn.Linear(model_dim, self.hidden_ff_dim),
             nn.GELU(),
             nn.Dropout(dropout_rate),
-            nn.Linear(self.hidden_ff_dim, input_model_dim),
+            nn.Linear(self.hidden_ff_dim, model_dim),
             nn.Dropout(dropout_rate)
         )
 
-        self.layer_norm = nn.LayerNorm(input_model_dim)
+        self.layer_norm = nn.LayerNorm(model_dim)
 
     def forward(self, x : torch.Tensor) -> torch.Tensor:
         """
@@ -76,18 +76,19 @@ class FeedForwardLayer(nn.Module):
         return x
 
 class HybridEncoder(nn.Module):
-    def __init__(self, input_model_dim, hidden_ff_dim, dropout_rate_attention, dropout_rate_ff):
+    def __init__(self, model_dim : int, hidden_ff_dim : int,
+                 dropout_rate_attention : float, dropout_rate_ff : float):
         """
         this module combines attention and feed-forward layers
-        :param input_model_dim: model dimension
+        :param model_dim: model dimension
         :param hidden_ff_dim:
         :param dropout_rate_attention:
         :param dropout_rate_ff:
         """
         super().__init__()
-        self.attention = AttentionLayer(input_model_dim, dropout_rate_attention)
-        self.feed_forward = FeedForwardLayer(input_model_dim, hidden_ff_dim, dropout_rate_ff)
-        self.layer_norm = nn.LayerNorm(input_model_dim)
+        self.attention = AttentionLayer(model_dim, dropout_rate_attention)
+        self.feed_forward = FeedForwardLayer(model_dim, hidden_ff_dim, dropout_rate_ff)
+        self.layer_norm = nn.LayerNorm(model_dim)
 
     def forward(self, x : torch.Tensor, mask : torch.Tensor) -> torch.Tensor:
         """
@@ -96,9 +97,9 @@ class HybridEncoder(nn.Module):
         :param mask: mask tensor of shape (batch_size, windows_number) indicating which windows are just padding
         :return: post attention and feed-forward result, tensor of shape (batch_size, windows_number, input_model_dim)
         """
-        x = self.attention(x, mask)
+        x = self.attention.forward(x, mask)
         x = self.layer_norm(x)
-        x = self.feed_forward(x)
+        x = self.feed_forward.forward(x)
         return x
 
 def global_context_aggregation(x : torch.Tensor, mask : torch.Tensor) -> torch.Tensor:
