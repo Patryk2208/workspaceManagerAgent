@@ -1,23 +1,42 @@
 import torch
+import numpy as np
 from sentence_transformers import SentenceTransformer
 import math
 
+from torch.nn.functional import embedding
+
 from model.api.schema_validation.state_schema import StatePayload
+from model.model.embedding_caching import EmbeddingCaching
+
 
 class TextEmbedder:
     def __init__(self):
+        self.cache = EmbeddingCaching()
         self.model = SentenceTransformer(model_name_or_path="all-MiniLM-L6-v2")
         self.model.eval()
 
     def embed_window_description(self, window_descriptions : list[str]) -> torch.Tensor:
         """
-        embeds windows descriptions using sentence transformer.
+        embeds windows descriptions using sentence transformer, tries to get a cached embedding, if not present,
+        runs the model.
         :param window_descriptions: list of window descriptions
         :return: tensor of shape (batch_size, windows_number, 384)
         """
+        embeddings = self.cache.try_get_cache_hit_batch(window_descriptions)
+        cache_misses = []
+        cache_miss_indices = []
+        i = 0
+        for e in embeddings:
+            if e is None:
+                cache_misses.append(e)
+                cache_miss_indices.append(i)
+            i += 1
         with torch.no_grad():
-            embeddings = self.model.encode(window_descriptions, convert_to_tensor=True)
-        return embeddings
+            new_embeddings = self.model.encode(cache_misses)
+        for i in range(len(cache_misses)):
+            self.cache.cache_sentence(cache_misses[i], new_embeddings[i])
+            embeddings[cache_miss_indices[i]] = new_embeddings[i]
+        return torch.tensor(np.stack(embeddings))
 
 
 class InputRepresentation:
