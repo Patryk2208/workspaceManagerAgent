@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"sync"
@@ -15,7 +16,8 @@ type WorkspaceState struct {
 	StateChannel    chan json.RawMessage
 }
 
-func RunStateServer(wmConnection *I3ipcConnection, requestChannel chan bool, stateChannel chan json.RawMessage) {
+func RunStateServer(wmConnection *I3ipcConnection, requestChannel chan bool,
+	stateChannel chan json.RawMessage, ctx context.Context, wg sync.WaitGroup) {
 	workspaceState := &WorkspaceState{
 		Windows:        make(map[int64]WindowState),
 		RequestChannel: requestChannel,
@@ -24,12 +26,19 @@ func RunStateServer(wmConnection *I3ipcConnection, requestChannel chan bool, sta
 	const interval = 2 * time.Second
 	go workspaceState.RunInterface()
 	for {
-		workspaceState.windowsMutex.Lock()
-		ScanState(wmConnection, workspaceState)
-		workspaceState.updateTimestamp = time.Now()
-		workspaceState.windowsMutex.Unlock()
-		time.Sleep(interval)
+		select {
+		case <-time.After(interval):
+			workspaceState.windowsMutex.Lock()
+			ScanState(wmConnection, workspaceState)
+			workspaceState.updateTimestamp = time.Now()
+			workspaceState.windowsMutex.Unlock()
+			log.Println("Scanned state")
+		case <-ctx.Done():
+			log.Println("Exiting RunStateServer")
+			break
+		}
 	}
+	wg.Done()
 }
 
 func (ws *WorkspaceState) RunInterface() {
@@ -40,6 +49,7 @@ func (ws *WorkspaceState) RunInterface() {
 			msg := ws.ParseState()
 			if msg != nil {
 				ws.StateChannel <- msg
+				log.Println("Parsed and prepared state message")
 			}
 			ws.windowsMutex.Unlock()
 		}
