@@ -1,43 +1,29 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/mdirkse/i3ipc-go"
-	"time"
 )
 
 type I3ipcConnection struct {
-	Conn         *i3ipc.IPCSocket
-	ActionBuffer chan string
+	Conn          *i3ipc.IPCSocket
+	ActionChannel chan json.RawMessage
 }
 
-//state
-
-type WorkspaceState struct {
-	Windows map[int64]WindowState
-} //todo check deleted windows
-
-type WindowState struct {
-	AppInfo         string
-	Rect            i3ipc.Rect
-	WorkspaceNumber int
-	Activity        WindowActivity
-	StillExists     bool
+func NewI3ipcConnection(conn *i3ipc.IPCSocket) *I3ipcConnection {
+	const bufferSize = 64
+	return &I3ipcConnection{
+		Conn:          conn,
+		ActionChannel: make(chan json.RawMessage, bufferSize),
+	}
 }
 
-type WindowActivity struct {
-	LastFocusTime *time.Time
-	FocusDuration *time.Duration
-}
-
-//action
-
-type WorkspaceAction struct {
-	WindowPositions map[int64]WindowPosition
-}
-
-type WindowPosition struct {
-	TopLeft     int
-	BottomRight int
+func CreateSwayConnection() (*I3ipcConnection, error) {
+	sock, err := i3ipc.GetIPCSocket()
+	if err != nil {
+		return nil, err
+	}
+	return NewI3ipcConnection(sock), nil
 }
 
 func ConvertToScreenSize(windowPosition WindowPosition, screenWidth int, screenHeight int) (i3ipc.Rect, error) {

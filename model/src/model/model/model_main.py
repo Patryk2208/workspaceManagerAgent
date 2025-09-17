@@ -21,23 +21,24 @@ class DeepSetsWithAttentionModel(nn.Module):
         self.max_workspace_number = 10
 
         #model params
+        self.model_dtype = torch.float32
         self.batch_size = 32
         self.input_scalar_features_dim = 8
         self.input_text_dim = 384
 
-        self.hidden_scalar_preprocessor_dim = 0 #todo
-        self.model_scalar_dim = 0 #todo
-        self.model_text_dim = 0 #todo
-        self.preprocessor_scalar_dropout_rate = 0.1 #todo
-        self.preprocessor_text_dropout_rate = 0.1 #todo
+        self.hidden_scalar_preprocessor_dim = 64
+        self.model_scalar_dim = 128
+        self.model_text_dim = 128
+        self.preprocessor_scalar_dropout_rate = 0.1
+        self.preprocessor_text_dropout_rate = 0.1
 
-        self.model_dim = 0 #todo
-        self.hidden_ff_dim = 0 #todo
-        self.attention_dropout_rate = 0.1 #todo
-        self.ff_dropout_rate = 0.1 #todo
+        self.model_dim = 256
+        self.hidden_ff_dim = 512
+        self.attention_dropout_rate = 0.1
+        self.ff_dropout_rate = 0.1
 
-        self.hidden_action_dim = 0 #todo
-        self.action_dropout_rate = 0.1 #todo
+        self.hidden_action_dim = 256
+        self.action_dropout_rate = 0.1
 
         #sub-modules
         self.input_representation = InputRepresentation(

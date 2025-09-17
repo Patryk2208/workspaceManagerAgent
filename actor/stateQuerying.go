@@ -9,14 +9,14 @@ import (
 const ContainerSway = "con"
 const WorkspaceSway = "workspace"
 
-func (swayConn *I3ipcConnection) getSwayTree(state WorkspaceState) {
+func (swayConn *I3ipcConnection) getSwayTree(state *WorkspaceState) {
 	root, err := swayConn.Conn.GetTree()
 	if err != nil {
 		return
 	}
 	ParseSwayTree(&root, 0, state)
 }
-func ParseSwayTree(root *i3ipc.I3Node, currentWorkspace int, workspaceState WorkspaceState) {
+func ParseSwayTree(root *i3ipc.I3Node, currentWorkspace int, workspaceState *WorkspaceState) {
 	if len(root.Nodes) == 0 {
 		return
 	}
@@ -29,7 +29,7 @@ func ParseSwayTree(root *i3ipc.I3Node, currentWorkspace int, workspaceState Work
 	} else if root.Type == ContainerSway {
 		v, exists := workspaceState.Windows[root.ID]
 		if exists {
-			UpdateWindowState(root, currentWorkspace, &v)
+			UpdateWindowState(root, currentWorkspace, workspaceState.updateTimestamp, &v)
 		} else {
 			workspaceState.Windows[root.ID] = CreateWindowState(root, currentWorkspace)
 		}
@@ -40,32 +40,35 @@ func ParseSwayTree(root *i3ipc.I3Node, currentWorkspace int, workspaceState Work
 }
 
 func CreateWindowState(node *i3ipc.I3Node, workspaceNumber int) WindowState {
-	now := time.Now()
-	noDuration := time.Duration(0)
-	lastFocusTime := &now
-	focusDuration := &noDuration
-	if !node.Focused {
-		lastFocusTime = nil
-		focusDuration = nil
-	}
 	activity := WindowActivity{
-		LastFocusTime: lastFocusTime,
-		FocusDuration: focusDuration,
+		IsFocused:            node.Focused,
+		CurrentFocusDuration: 0,
+		TotalFocusDuration:   0,
 	}
+	position := WindowPosition{}
 	return WindowState{
-		AppInfo:         node.Name,
-		Rect:            node.Rect,
+		WindowId:        node.ID,
+		Title:           node.Name,
+		Position:        position, //todo
+		WindowActivity:  activity,
 		WorkspaceNumber: workspaceNumber,
-		Activity:        activity,
-		StillExists:     true,
+		stillExists:     true,
 	}
 }
 
-func UpdateWindowState(node *i3ipc.I3Node, workspaceNumber int, windowState *WindowState) {
-	windowState.AppInfo = node.Name
-	windowState.Rect = node.Rect
+func UpdateWindowState(node *i3ipc.I3Node, workspaceNumber int, lastTimestamp time.Time, windowState *WindowState) {
+	//todo id
+	windowState.Title = node.Name
+	windowState.Position = WindowPosition{} //todo
+	wasFocused := windowState.WindowActivity.IsFocused
+	windowState.WindowActivity.IsFocused = node.Focused
+	if wasFocused {
+		windowState.WindowActivity.CurrentFocusDuration += time.Now().Sub(lastTimestamp)
+		windowState.WindowActivity.TotalFocusDuration += time.Now().Sub(lastTimestamp)
+	}
+	if !node.Focused {
+		windowState.WindowActivity.CurrentFocusDuration = 0
+	}
 	windowState.WorkspaceNumber = workspaceNumber
-	windowState.StillExists = true
-
-	//todo update activity
+	windowState.stillExists = true
 }

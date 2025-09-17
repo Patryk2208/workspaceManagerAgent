@@ -3,8 +3,6 @@ import redis
 import os
 import hashlib
 
-from numpy import ndarray
-
 
 class EmbeddingCaching:
     def __init__(self):
@@ -45,7 +43,7 @@ class EmbeddingCaching:
         """
         return hashlib.sha256(sentence.encode()).hexdigest()
 
-    def try_get_cache_hit(self, sentence : str) -> ndarray | None:
+    def try_get_cache_hit(self, sentence : str) -> np.ndarray | None:
         """
         checks if the sentence is already cached in the cache.
         :param sentence:
@@ -62,7 +60,7 @@ class EmbeddingCaching:
             print(f"Failed to cache sentence: {e}")
             return None
 
-    def try_get_cache_hit_batch(self, sentences : list[str]) -> list[ndarray] | None:
+    def try_get_cache_hit_batch(self, sentences : list[str]) -> list[np.ndarray] | None:
         """
         checks what sentences are already cached in the cache.
         :param sentences: list of sentences
@@ -85,7 +83,7 @@ class EmbeddingCaching:
             print(f"Failed to cache sentence: {e}")
             return None
 
-    def cache_sentence(self, sentence : str, embedding : ndarray) -> bool:
+    def cache_sentence(self, sentence : str, embedding : np.ndarray) -> bool:
         """
         cache the sentence and its embedding.
         :param sentence:
