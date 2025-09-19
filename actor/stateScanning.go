@@ -6,14 +6,17 @@ import (
 	"time"
 )
 
-func ScanState(swayConn *I3ipcConnection, workspaceState *WorkspaceState) {
+func ScanState(swayConn *I3ipcConnection, workspaceState *WorkspaceState) error {
 	for id := range workspaceState.Windows {
 		temp := workspaceState.Windows[id]
 		temp.stillExists = false
 		workspaceState.Windows[id] = temp
 	}
 
-	swayConn.getSwayTree(workspaceState)
+	err := swayConn.GetSwayTree(workspaceState)
+	if err != nil {
+		return err
+	}
 
 	for id := range workspaceState.Windows {
 		temp := workspaceState.Windows[id]
@@ -21,18 +24,19 @@ func ScanState(swayConn *I3ipcConnection, workspaceState *WorkspaceState) {
 			delete(workspaceState.Windows, id)
 		}
 	}
-
+	return nil
 }
 
 const ContainerSway = "con"
 const WorkspaceSway = "workspace"
 
-func (swayConn *I3ipcConnection) getSwayTree(state *WorkspaceState) {
+func (swayConn *I3ipcConnection) GetSwayTree(state *WorkspaceState) error {
 	root, err := swayConn.Conn.GetTree()
 	if err != nil {
-		return
+		return err
 	}
 	ParseSwayTree(&root, 0, state)
+	return nil
 }
 func ParseSwayTree(root *i3ipc.I3Node, currentWorkspace int, workspaceState *WorkspaceState) {
 	if len(root.Nodes) == 0 {

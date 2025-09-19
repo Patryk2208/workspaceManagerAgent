@@ -2,23 +2,18 @@ import torch
 import torch.nn as nn
 
 class ScalarFeaturePreprocessor(nn.Module):
-    def __init__(self, input_data_dim : int, hidden_preprocessor_dim : int, output_model_dim : int,
+    def __init__(self, input_data_dim : int, output_model_dim : int,
                  dropout_rate : float):
         """
         preprocessing layer for scalar features
         :param input_data_dim: number of scalar features
-        :param hidden_preprocessor_dim: hidden layer dimension
         :param output_model_dim: dimension with refined understanding of features for the model
         :param dropout_rate:
         """
         super().__init__()
 
         self.mlp = nn.Sequential(
-            nn.Linear(input_data_dim, hidden_preprocessor_dim),
-            nn.LayerNorm(hidden_preprocessor_dim),
-            nn.GELU(),
-            nn.Dropout(dropout_rate),
-            nn.Linear(hidden_preprocessor_dim, output_model_dim),
+            nn.Linear(input_data_dim, output_model_dim),
             nn.LayerNorm(output_model_dim),
             nn.GELU(),
             nn.Dropout(dropout_rate)
@@ -60,14 +55,14 @@ class TextFeaturePreprocessor(nn.Module):
 
 
 class FeaturePreprocessor(nn.Module):
-    def __init__(self, input_data_dim : int, hidden_preprocessor_dim : int, output_model_dim_scalar : int,
+    def __init__(self, input_data_dim : int, output_model_dim_scalar : int,
                  dropout_rate_scalar : float, input_text_dim : int, output_model_dim_text : int,
                  dropout_rate_text : float):
         """
         collective preprocessing layer for both scalar and text features
         """
         super().__init__()
-        self.scalar_preprocessor = ScalarFeaturePreprocessor(input_data_dim, hidden_preprocessor_dim,
+        self.scalar_preprocessor = ScalarFeaturePreprocessor(input_data_dim,
                                                              output_model_dim_scalar, dropout_rate_scalar)
         self.text_preprocessor = TextFeaturePreprocessor(input_text_dim, output_model_dim_text, dropout_rate_text)
 

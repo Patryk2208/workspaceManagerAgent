@@ -7,6 +7,7 @@ from typing import Optional
 from model.agent.performance_data import PerformanceData
 from model.api.rest_client import HTTPClient
 from model.config import config
+from model.model.model_main import DeepSetsWithAttentionModel
 
 logger = logging.getLogger(__name__)
 
@@ -19,12 +20,12 @@ class Agent:
         self.stop_event = asyncio.Event()
         self.loop = asyncio.get_event_loop()
         self.task_group : Optional[TaskGroup] = None
-        self.thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=2, thread_name_prefix="model_thread")
+        self.thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=4, thread_name_prefix="model_thread")
 
         #orchestrated agent tools
         self.performance_data : PerformanceData = PerformanceData()
         self.api_client : HTTPClient = HTTPClient(config.server_url, config.request_timeout)
-        self.model = None
+        self.model = DeepSetsWithAttentionModel()
 
 
     async def run_agent(self):
@@ -41,10 +42,11 @@ class Agent:
                         state = await self.task_group.create_task(self.api_client.get_state())
                         @self.performance_data.measure_model_iteration_performance
                         async def model_predict():
-                            return await asyncio.sleep(2)
-                        # todo fp on nn (after model implementation)
-                        
-                        # todo post command
+                            c = await self.task_group.create_task(self.model.forward([state]))
+                            return c[0]
+                        command = await model_predict()
+                        await self.task_group.create_task(self.api_client.send_command(command))
+                        await asyncio.sleep(self.interval)
         except asyncio.CancelledError:
             logger.debug("agent cancelled")
 
@@ -54,6 +56,6 @@ class Agent:
         raise asyncio.CancelledError
 
 
-    def stop_agent(self):
+    async def stop_agent(self):
+        await self.model.close()
         self.stop_event.set()
-        #todo agent stopping procedure

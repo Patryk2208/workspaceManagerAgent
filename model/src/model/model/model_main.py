@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from torch.onnx.ops import attention
 
+from model.api.schema_validation.command_schema import CommandPayload
 from model.model.attention import HybridEncoder, global_context_aggregation
 from model.model.input_representation import InputRepresentation
 from model.model.policy_head import PolicyHead
@@ -26,18 +27,17 @@ class DeepSetsWithAttentionModel(nn.Module):
         self.input_scalar_features_dim = 8
         self.input_text_dim = 384
 
-        self.hidden_scalar_preprocessor_dim = 64
-        self.model_scalar_dim = 128
-        self.model_text_dim = 128
+        self.model_scalar_dim = 32
+        self.model_text_dim = 64
         self.preprocessor_scalar_dropout_rate = 0.1
         self.preprocessor_text_dropout_rate = 0.1
 
-        self.model_dim = 256
-        self.hidden_ff_dim = 512
+        self.model_dim = 96
+        self.hidden_ff_dim = 128
         self.attention_dropout_rate = 0.1
         self.ff_dropout_rate = 0.1
 
-        self.hidden_action_dim = 256
+        self.hidden_action_dim = 96
         self.action_dropout_rate = 0.1
 
         #sub-modules
@@ -53,7 +53,6 @@ class DeepSetsWithAttentionModel(nn.Module):
 
         self.feature_preprocessor = FeaturePreprocessor(
             input_data_dim=self.input_scalar_features_dim,
-            hidden_preprocessor_dim=self.hidden_scalar_preprocessor_dim,
             output_model_dim_scalar=self.model_scalar_dim,
             dropout_rate_scalar=self.preprocessor_scalar_dropout_rate,
             input_text_dim=self.input_text_dim,
@@ -92,7 +91,7 @@ class DeepSetsWithAttentionModel(nn.Module):
     def init_weights(self):
         pass
 
-    def forward(self, batch : list[StatePayload]):
+    async def forward(self, batch : list[StatePayload]) -> list[CommandPayload]:
         if len(batch) <= 0 or len(batch) > self.batch_size:
             raise ValueError("invalid batch size")
         description_embeddings, scalar_features, mask = self.input_representation.process_input(batch)
@@ -101,9 +100,13 @@ class DeepSetsWithAttentionModel(nn.Module):
         global_context = global_context_aggregation(attention_output, mask)
         prob_tlx, prob_tly, prob_brx, prob_bry, prob_ws = self.policy_head.forward(attention_output, global_context)
         #todo
+        return []
 
     def save(self):
         pass
 
     def load(self):
+        pass
+
+    async def close(self):
         pass

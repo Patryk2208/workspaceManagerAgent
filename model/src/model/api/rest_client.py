@@ -23,7 +23,7 @@ class HTTPClient:
         await self.session.close()
 
 
-    async def get_state(self) -> Optional[dict]:
+    async def get_state(self) -> Optional[StatePayload]:
         """
         Fetch and validate state from the native, state-collecting server.
 
@@ -41,7 +41,7 @@ class HTTPClient:
                     logger.debug("Received invalid state data from server")
                     return None
 
-                return validated_state.model_dump()
+                return validated_state
 
         except Exception as e:
             logger.debug(f"Failed to fetch state data from server: {e}")

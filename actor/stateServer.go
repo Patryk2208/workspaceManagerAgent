@@ -29,10 +29,14 @@ func RunStateServer(wmConnection *I3ipcConnection, requestChannel chan bool,
 		select {
 		case <-time.After(interval):
 			workspaceState.windowsMutex.Lock()
-			ScanState(wmConnection, workspaceState)
-			workspaceState.updateTimestamp = time.Now()
+			err := ScanState(wmConnection, workspaceState)
+			if err != nil {
+				log.Println(err)
+			} else {
+				workspaceState.updateTimestamp = time.Now()
+				log.Println("Scanned state")
+			}
 			workspaceState.windowsMutex.Unlock()
-			log.Println("Scanned state")
 		case <-ctx.Done():
 			log.Println("Exiting RunStateServer")
 			break
