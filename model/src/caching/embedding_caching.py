@@ -5,18 +5,18 @@ import hashlib
 
 
 class EmbeddingCaching:
-    def __init__(self):
+    def __init__(self, host, port, db, password):
         """
         redis client for caching window descriptions' embeddings.
         """
-        self.host = os.environ.get("REDIS_HOST", "localhost")
-        self.port = os.environ.get("REDIS_PORT", "6379")
-        self.db = os.environ.get("REDIS_DB", 0)
-        self.password = os.environ.get("REDIS_PASSWORD", None)
+        self.host = host
+        self.port = port
+        self.db = db
+        self.password = password
         self.redis_client = redis.Redis(
             host=self.host,
             port=self.port,
-            db=0,
+            db=self.db,
             password=self.password,
             decode_responses=False
         )

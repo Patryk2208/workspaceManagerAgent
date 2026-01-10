@@ -2,8 +2,8 @@ import aiohttp
 from typing import Optional
 import logging
 
-from model.api.schema_validation.state_schema import StatePayload, validate_state_payload
-from model.api.schema_validation.command_schema import CommandPayload
+from api.schema_validation.state_schema import StatePayload, validate_state_payload
+from api.schema_validation.command_schema import CommandPayload
 
 logger = logging.getLogger(__name__)
 

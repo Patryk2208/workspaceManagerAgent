@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, model_validator
-from model.config import config
+from config import config
 
 class GridPosition(BaseModel):
     """Object representing the window's position on a screen as on a grid"""

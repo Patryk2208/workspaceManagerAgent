@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 from datetime import timedelta
 
 from .grid_system_schema import GridPosition
-from model.config import config
+from config import config
 
 #sub-schemas
 class ActivityStatistics(BaseModel):

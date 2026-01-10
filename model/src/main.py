@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from model.agent.program_loop import Agent
+from agent import Agent
 
 logger = logging.getLogger(__name__)
 

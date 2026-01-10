@@ -1,13 +1,10 @@
 import os
 from dataclasses import dataclass, field
-from dotenv import load_dotenv
-
-load_dotenv()
 
 @dataclass
 class ModelConfig:
     server_host: str = field(default_factory=lambda: os.getenv("SERVER_HOST", "localhost"))
-    server_port: int = field(default_factory=lambda: int(os.getenv("SERVER_PORT", "8000")))
+    server_port: int = field(default_factory=lambda: int(os.getenv("SERVER_PORT", "8080")))
 
     max_windows: int = field(default_factory=lambda: int(os.getenv("MAX_WINDOWS", "20")))
     grid_rows: int = field(default_factory=lambda: int(os.getenv("GRID_ROWS", "6")))
@@ -15,6 +12,12 @@ class ModelConfig:
 
     poll_interval: float = field(default_factory=lambda: float(os.getenv("POLL_INTERVAL", "1.0")))
     request_timeout: float = field(default_factory=lambda: float(os.getenv("REQUEST_TIMEOUT", "5.0")))
+
+    redis_host: str = field(default_factory=lambda: os.getenv("REDIS_HOST", "localhost"))
+    redis_port: int = field(default_factory=lambda: int(os.getenv("REDIS_PORT", "6379")))
+    redis_test_db: int = field(default_factory=lambda: int(os.getenv("REDIS_DB", "0")))
+    redis_pre_training_db: int = field(default_factory=lambda: int(os.getenv("REDIS_DB", "1")))
+    redis_prod_db: int = field(default_factory=lambda: int(os.getenv("REDIS_DB", "2")))
 
     # Derived properties
     @property

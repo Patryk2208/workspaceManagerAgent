@@ -1,14 +1,12 @@
-import torch
 import torch.nn as nn
-from torch.onnx.ops import attention
 
-from model.api.schema_validation.command_schema import CommandPayload
-from model.model.attention import HybridEncoder, global_context_aggregation
-from model.model.input_representation import InputRepresentation
-from model.model.policy_head import PolicyHead
-from model.model.preprocessing import FeaturePreprocessor
-from model.model.action_discretization import *
-from model.api.schema_validation.state_schema import StatePayload
+from api.schema_validation.command_schema import CommandPayload
+from model.attention import HybridEncoder, global_context_aggregation
+from model.input_representation import InputRepresentation
+from model.policy_head import PolicyHead
+from model.preprocessing import FeaturePreprocessor
+from model.action_discretization import *
+from api.schema_validation.state_schema import StatePayload
 
 
 class DeepSetsWithAttentionModel(nn.Module):

@@ -4,10 +4,10 @@ import concurrent.futures
 from asyncio import TaskGroup
 from typing import Optional
 
-from model.agent.performance_data import PerformanceData
-from model.api.rest_client import HTTPClient
-from model.config import config
-from model.model.model_main import DeepSetsWithAttentionModel
+from agent.performance_data import PerformanceData
+from api.rest_client import HTTPClient
+from config import config
+from model.model_main import DeepSetsWithAttentionModel
 
 logger = logging.getLogger(__name__)
 

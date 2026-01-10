@@ -2,9 +2,9 @@ from time import clock_gettime, CLOCK_REALTIME
 from typing import Optional
 import logging
 
-from model.config import config
-from model.api.schema_validation.command_schema import Command, MinimizeCommand, AlterCommand, CommandPayload
-from model.api.schema_validation.grid_system_schema import GridPosition
+from config import config
+from api.schema_validation.command_schema import Command, MinimizeCommand, AlterCommand, CommandPayload
+from api.schema_validation.grid_system_schema import GridPosition
 
 logger = logging.getLogger(__name__)
 

@@ -3,10 +3,8 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 import math
 
-from torch.nn.functional import embedding
-
-from model.api.schema_validation.state_schema import StatePayload
-from model.model.embedding_caching import EmbeddingCaching
+from api.schema_validation.state_schema import StatePayload
+from caching.embedding_caching import EmbeddingCaching
 
 
 class TextEmbedder:
